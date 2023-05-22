@@ -1,6 +1,6 @@
 # [Backstage](https://backstage.io)
 
-This is your newly scaffolded Backstage App, Good Luck!
+This is my newly scaffolded Backstage App!
 
 To start the app, run:
 
@@ -8,3 +8,4 @@ To start the app, run:
 yarn install
 yarn dev
 ```
+This has the Github PR Plugin with Webhooks
