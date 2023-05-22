@@ -1,2 +1,10 @@
-# mybackstage
-This is my Backstage config with quite a lot of plugins, like Github PR plugins, Git Dashboard and all.
+# [Backstage](https://backstage.io)
+
+This is your newly scaffolded Backstage App, Good Luck!
+
+To start the app, run:
+
+```sh
+yarn install
+yarn dev
+```

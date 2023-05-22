@@ -6,99 +6,51 @@ organization:
   name: My Company
 
 backend:
+  # Used for enabling authentication, secret is shared by all backend plugins
+  # See https://backstage.io/docs/auth/service-to-service-auth for
+  # information on the format
+  # auth:
+  #   keys:
+  #     - secret: ${BACKEND_SECRET}
   baseUrl: http://localhost:7007
-
   listen:
     port: 7007
+    # Uncomment the following host directive to bind to specific interfaces
+    # host: 127.0.0.1
   csp:
     connect-src: ["'self'", 'http:', 'https:']
+    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
+    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
   cors:
     origin: http://localhost:3000
-    methods: [GET, POST, PUT, DELETE]
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
     credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
   database:
     client: better-sqlite3
     connection: ':memory:'
   cache:
     store: memory
-  auth:
-    keys:
-      - secret: foo
   # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
 
 integrations:
   github:
     - host: github.com
-      token: ${GITHUB_TOKEN}
+      # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+      # about setting up the GitHub integration here: https://backstage.io/docs/getting-started/configuration#setting-up-a-github-integration
+      token: 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
     ### Example for how to add your GitHub Enterprise instance using the API:
     # - host: ghe.example.net
     #   apiBaseUrl: https://ghe.example.net/api/v3
     #   token: ${GHE_TOKEN}
 
 proxy:
-  '/test':
-    target: 'https://example.com'
-    changeOrigin: true
-
-  '/cloudsmith':
-    target: 'https://api.cloudsmith.io/v1'
-    headers:
-      X-Api-Key: ${CLOUDSMITH_API_KEY}
-      User-Agent: 'Backstage'
-
-  '/aws-news-feed':
-    target: 'https://aws.amazon.com/about-aws/whats-new/recent/feed/'
-
-  '/reuters-news-feed':
-    target: 'https://www.reutersagency.com/feed'
-
-  '/jira/api':
-    target: 'https://roadie-dev.atlassian.net'
-    headers:
-      Authorization:
-        $env: JIRA_TOKEN
-      Accept: 'application/json'
-      Content-Type: 'application/json'
-      X-Atlassian-Token: 'no-check'
-      User-Agent: 'Roadie-Backstage'
-
-  '/travisci/api':
-    target: https://api.travis-ci.com
-    changeOrigin: true
-    headers:
-      Authorization: 'token ${TRAVISCI_AUTH_TOKEN}'
-      travis-api-version: '3'
-
-  '/buildkite/api':
-    target: https://api.buildkite.com/v2/
-    headers:
-      Authorization: 'Bearer ${BUILDKITE_API_TOKEN}'
-
-  '/argocd/api':
-    # url to the api of your hosted argoCD instance
-    target: https://localhost:8080/api/v1/
-    changeOrigin: true
-    # this line is required if your hosted argoCD instance has self-signed certificate
-    secure: false
-    headers:
-      Cookie: ${ARGOCD_AUTH_TOKEN}
-
-  '/prometheus/api':
-    # url to the api of your hosted prometheus instance
-    target: http://localhost:9090/api/v1/
-    changeOrigin: true
-    secure: false
-
-  '/bugsnag/api':
-    target: 'https://api.bugsnag.com'
-    headers:
-      Authorization: 'token ${BUGSNAG_PERSONAL_TOKEN}'
-      X-version: '2'
-
-  '/shortcut/api':
-    target: https://api.app.shortcut.com/api/v3
-    headers:
-      Shortcut-Token: '${SHORTCUT_API_TOKEN}'
+  ### Example for how to add a proxy endpoint for the frontend.
+  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
+  # '/test':
+  #   target: 'https://example.com'
+  #   changeOrigin: true
 
 # Reference documentation http://backstage.io/docs/features/techdocs/configuration
 # Note: After experimenting with basic setup, use CI/CD to generate docs
@@ -106,111 +58,55 @@ proxy:
 # https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
 techdocs:
   builder: 'local' # Alternatives - 'external'
-  generators:
-    techdocs: 'docker' # Alternatives - 'local'
+  generator:
+    runIn: 'docker' # Alternatives - 'local'
   publisher:
     type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
 
-
 auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
   environment: development
   # see https://backstage.io/docs/auth/ to learn about auth providers
   providers:
     github:
       development:
-        clientId: ${AUTH_GITHUB_CLIENT_ID}
-        clientSecret: ${AUTH_GITHUB_CLIENT_SECRET}
+        clientId: 89ba97571f0936c9c342
+        clientSecret: 2987c62b30a54b2a4f9aa574ab4f8b542cc8ba63
         ## uncomment if using GitHub Enterprise
         # enterpriseInstanceUrl: ${AUTH_GITHUB_ENTERPRISE_INSTANCE_URL}
 
 scaffolder:
-  github:
-    token: ${GITHUB_TOKEN}
-    visibility: public # or 'internal' or 'private'
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
 
 catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
   rules:
-    - allow: [Component, System, API, Group, User, Resource, Location, Template]
+    - allow: [Component, System, API, Resource, Location]
   locations:
-    # File used for testing purposes
+    # Local example data, file locations are relative to the backend process, typically `packages/backend`
     - type: file
-      target: ../entities/test-entity.yaml
+      target: ../../examples/entities.yaml
 
+    # Local example template
     - type: file
-      target: ../entities/test-template.yaml
-      rules:
-        - allow: [Template]
-    # Roadie example AWS ECR repo creation
-    - type: file
-      target: ../entities/ecr-repo-create-template.yaml
-      rules:
-        - allow: [Template]
-    # Backstage example components
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-components.yaml
-
-    # Backstage example systems
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-systems.yaml
-
-    # Backstage example APIs
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-apis.yaml
-
-    # Backstage example resources
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all-resources.yaml
-
-    # Backstage example organization groups
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme/org.yaml
-
-    - type: url
-      target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/remote-templates.yaml
+      target: ../../examples/template/template.yaml
       rules:
         - allow: [Template]
 
-    # Backstage example templates
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/react-ssr-template/template.yaml
-    #   rules:
-    #     - allow: [Template]
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/springboot-grpc-template/template.yaml
-    #   rules:
-    #     - allow: [Template]
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/create-react-app/template.yaml
-    #   rules:
-    #     - allow: [Template]
-    # - type: url
-    #   target: https://github.com/spotify/cookiecutter-golang/blob/master/template.yaml
-    #   rules:
-    #     - allow: [Template]
-    # - type: url
-    #   target: https://github.com/backstage/backstage/blob/master/plugins/scaffolder-backend/sample-templates/docs-template/template.yaml
-    #   rules:
-    #     - allow: [Template]
-argocd:
-  baseUrl: https://localhost:8080
-  username: ${ARGOCD_USERNAME}
-  password: ${ARGOCD_PASSWORD}
-  appLocatorMethods:
-    []
-    ## The below is if you wish to scan all Argo CD instances, however
-    ## you must also configure the `backstage-plugin-argo-cd-backend`
-    ## plugin to use the below. Please see the README.md for plugin
-    ## `backstage-plugin-argo-cd-backend`.
-    # - type: 'config'
-    #   instances:
-    #     - name: argoInstance2
-    #       url: https://argoInstance2.com
+    # Local example organizational data
+    - type: file
+      target: ../../examples/org.yaml
+      rules:
+        - allow: [User, Group]
 
-prometheus:
-  proxyPath: /prometheus/api
+    ## Uncomment these lines to add more example data
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
 
-bugsnag:
-  resultsPerPage: 50
-
-iframe:
-  allowList: ['example.com']
+    ## Uncomment these lines to add an example org
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
+    #   rules:
+    #     - allow: [User, Group]

@@ -1,20 +1,13 @@
 apiVersion: backstage.io/v1alpha1
 kind: Component
 metadata:
-  name: roadie-backstage-plugins
+  name: mybackstage
   description: An example of a Backstage application.
-  title: Roadie Backstage Plugins
+  # Example for optional annotations
+  # annotations:
+  #   github.com/project-slug: backstage/backstage
+  #   backstage.io/techdocs-ref: dir:.
 spec:
   type: website
-  owner: group:open-source
-  lifecycle: production
-
----
-apiVersion: backstage.io/v1alpha1
-kind: Location
-metadata:
-  name: roadie-backstage-plugins
-spec:
-  targets:
-    - ./plugins/**/catalog-info.yaml
-    - ./utils/**/catalog-info.yaml
+  owner: john@example.com
+  lifecycle: experimental

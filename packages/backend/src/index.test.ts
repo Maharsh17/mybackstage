@@ -1,4 +1,3 @@
-// eslint-disable-next-line notice/notice
 import { PluginEnvironment } from './types';
 
 describe('test', () => {

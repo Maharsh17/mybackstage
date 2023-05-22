@@ -1,4 +1,3 @@
-// eslint-disable-next-line notice/notice
 import { Logger } from 'winston';
 import { Config } from '@backstage/config';
 import {
@@ -8,17 +7,19 @@ import {
   TokenManager,
   UrlReader,
 } from '@backstage/backend-common';
-import { ServerPermissionClient } from '@backstage/plugin-permission-node';
 import { PluginTaskScheduler } from '@backstage/backend-tasks';
+import { PermissionEvaluator } from '@backstage/plugin-permission-common';
+import { IdentityApi } from '@backstage/plugin-auth-node';
 
 export type PluginEnvironment = {
   logger: Logger;
-  cache: PluginCacheManager;
   database: PluginDatabaseManager;
+  cache: PluginCacheManager;
   config: Config;
   reader: UrlReader;
   discovery: PluginEndpointDiscovery;
   tokenManager: TokenManager;
-  permissions: ServerPermissionClient;
   scheduler: PluginTaskScheduler;
+  permissions: PermissionEvaluator;
+  identity: IdentityApi;
 };
